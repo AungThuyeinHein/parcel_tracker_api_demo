@@ -1,0 +1,1786 @@
+openapi: "3.0.0"
+info:
+  title: SCM DEMO
+  description: This Documentation will help for Developer and Tester
+  version: "1.0.0"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /api/v1/user/login:
+   post:
+      summary: "User login"
+      description: "Endpoint for user login. Returns a JWT token upon successful authentication."
+      tags:
+        - User Managment Feature
+      requestBody:
+        required: true
+        content:   
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  format: username
+                  description: "The user's username"
+                  example: username
+                password:
+                  type: string
+                  format: password
+                  description: "The user's password"
+                  example: 12345
+      responses:
+        200:
+          description: "Login successful"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "User successfully log in."
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                            example: 66a92c7bfb3256a5e5a4be99
+                          username:
+                            type: string
+                            format: username
+                            example: username
+                          role:
+                            type: string
+                            example: user
+                      token:
+                        type: string
+                        description: "JWT token for authenticated requests"
+                        example: "token"
+
+        400:
+          description: "Incorrect username or password"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Please provide your account password"
+  /api/v1/auth/signup:
+    post:
+      summary: "Sign up a new user"
+      description: "Creates a new user account. Required fields: username, password, confirmPassword. Optional: role (owner/staff, default is staff)."
+      tags:
+        - User Managment Feature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - confirmPassword
+              properties:
+                username:
+                  type: string
+                  description: "Unique username for the user."
+                  example: johndoe
+                password:
+                  type: string
+                  format: password
+                  description: "The user's password."
+                  example: password123
+                confirmPassword:
+                  type: string
+                  format: password
+                  description: "Must match the password."
+                  example: password123
+                role:
+                  type: string
+                  enum: [owner, staff]
+                  description: "User role (optional, defaults to staff)."
+                  example: staff
+      responses:
+        201:
+          description: "User created successfully. Returns a JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "User created successfully."
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: "JWT token for authenticated requests."
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        400:
+          description: "Validation error (missing/invalid fields, username taken, password mismatch, etc.)"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "The username \"username\" is already in use. Please choose another one."
+
+  /api/v1/user/test-protect:
+    get:
+      summary: "Test user authentication"
+      description: "Checks if the current user is authenticated as staff. Returns user info if authenticated."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated as staff
+        '401':
+          description: Unauthorized access
+
+  /api/v1/user/test-owner:
+    get:
+      summary: "Test owner authentication"
+      description: "Checks if the current user is authenticated as owner. Returns user info if authenticated."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated as owner
+        '401':
+          description: Unauthorized access
+
+  /api/v1/user/test-staff:
+    get:
+      summary: "Test staff authentication"
+      description: "Checks if the current user is authenticated as staff or owner. Returns user info if authenticated."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Authenticated as staff or owner
+        '401':
+          description: Unauthorized access
+
+  /api/v1/user/seller:
+    get:
+      summary: "Get all seller usernames"
+      description: "Retrieves a list of all seller usernames."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Successfully retrieved usernames."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "User names have been retrived successfully"
+                  data:
+                    type: object
+                    properties:
+                      userData:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: alice
+        401:
+          description: "Unauthorized access"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Invalid token.Please login again"
+
+  /api/v1/user:
+    post:
+      summary: "Verify user password"
+      description: "Verifies the password of the currently authenticated user. Returns a success message if verified."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - verifyPassword
+              properties:
+                verifyPassword:
+                  type: string
+                  description: "The password to verify."
+                  example: password123
+      responses:
+        200:
+          description: "Password verified successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "Old password verified successfully. You can now update your password."
+        404:
+          description: "User not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "User not found."
+        401:
+          description: "Password Incorrect."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Password Incorrect."
+        400:
+          description: "Please provide your account password."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Please provide your account password."
+    get:
+      summary: "Get all user data"
+      description: "Retrieves data for all users. Only accessible by owner."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Successfully retrieved user data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "User Data have been retrived successfully."
+                  data:
+                    type: object
+                    properties:
+                      userData:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: johndoe
+        401:
+          description: "Unauthorized access"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+  /api/v1/user/{id}:
+    get:
+      summary: "Get user data by ID"
+      description: "Retrieves data for a specific user by their ID. Only accessible by owner."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The user ID
+      responses:
+        200:
+          description: "Successfully retrieved user data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "User Data retrived successfully"
+                  data:
+                    type: object
+                    properties:
+                      userData:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: johndoe
+                          role:
+                            type: string
+                            example: staff
+                          _id:
+                            type: string
+                            example: 66a7decef4c583c40145e503
+        400:
+          description: "Invalid ID or user not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "There is no user with the given ID."
+        401:
+          description: "Unauthorized access."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+  /api/v1/user/owner:
+    patch:
+      summary: "Update owner password"
+      description: "Allows the owner to update their password after verifying the old password. Requires password verification."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - newPassword
+                - confirmPassword
+              properties:
+                newPassword:
+                  type: string
+                  description: "The new password for the account."
+                  example: newpassword123
+                confirmPassword:
+                  type: string
+                  description: "Confirmation of the new password."
+                  example: newpassword123
+      responses:
+        200:
+          description: "Your account password updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "Your account password updated successfully."
+        400:
+          description: "Please provide new password and confirm password."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Please provide new password and confirm password."
+        403:
+          description: "Password verification required."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 403
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Password verification required."
+  /api/v1/user/staff/{id}:
+    patch:
+      summary: "Update staff password"
+      description: "Allows the owner to update a staff member's password."
+      tags:
+        - User Managment Feature
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The staff user ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - newPassword
+                - confirmPassword
+              properties:
+                newPassword:
+                  type: string
+                  description: "The new password for the staff member."
+                  example: newstaffpassword123
+                confirmPassword:
+                  type: string
+                  description: "Confirmation of the new password."
+                  example: newstaffpassword123
+      responses:
+        200:
+          description: "Staff account password updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: "Staff account password updated successfully."
+        400:
+          description: "Please provide new password and confirm password."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "Please provide new password and confirm password."
+        404:
+          description: "User not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "User not found."
+##################################################
+# Sale Report Feature
+  # /api/v1/report/sales:
+  /api/v1/report/sales:
+    get:
+      summary: "Get Sales Report"
+      description: "Retrieves the sales report for a specified date range."
+      tags:
+        - Report Feature
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "Start date for the sales report"
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "End date for the sales report"
+      responses:
+        200:
+          description: "Successful response with sales report data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Sales report generated successfully for the period from 1/4/2025 to 4/19/2025 (Myanmar Time)."
+                  data:
+                    type: object
+                    properties:
+                      totalSalesValue:
+                        type: number
+                      totalParcelCount:
+                        type: integer
+                      sellerSalesData:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            sellerTotalSaleAmount:
+                              type: number
+                            successParcelCount:
+                              type: integer
+                            sellerName:
+                              type: string
+                      topSeller:
+                          type: object
+                          properties:
+                            sellerTotalSaleAmount:
+                              type: number
+                            successParcelCount:
+                              type: integer
+                            sellerName:
+                              type: string
+                      successCount:
+                        type: integer
+                      cancelCount:
+                        type: integer
+                  detailedSuccessfulParcels:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        customerName:
+                          type: string
+                        address:
+                          type: string
+                        price:
+                          type: number
+                        seller:
+                          type: string
+                        paymentStatus:
+                          type: string
+                        deliveryStatus:
+                          type: string
+                        batchId:
+                          type: string
+                        deliveryFee:
+                          type: number
+                        parcelCreatedAt:
+                          type: string
+                          format: date-time
+                        ParcelUpdatedAt:
+                          type: string
+                          format: date-time
+                        detailedCancelledParcels:
+                          type: array
+                          items:
+                            type: object
+        400:
+          description: "Invalid date range. Start date must be before or equal to end date."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: fail
+                  message:
+                    type: string
+                    example: "startDate must be before or equal to endDate."
+  /api/v1/delivery-report:
+    get:
+      summary: "Get Delivery Report"
+      description: "Retrieves the delivery report for a specified date range."
+      tags:
+        - Report Feature
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "The start date for the delivery report in ISO 8601 format."
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "The end date for the delivery report in ISO 8601 format."
+      responses:
+        200:
+          description: "Successful response with delivery report data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Successfully retrieved finished and on-deliver delivery batches for the period from 1/4/2025 to 5/20/2025 with parcel counts."
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        batchName:
+                          type: string
+                        deliveryType:
+                          type: string
+                        parcels:
+                          type: array
+                          items:
+                            type: string
+                        status:
+                          type: string
+                        batchCreatedAt:
+                          type: string
+                          format: date-time
+                        batchUpdatedAt:
+                          type: string
+                          format: date-time
+                        successParcelCount:
+                          type: integer
+                        cancelParcelCount:
+                          type: integer
+        '400':
+          description: "Bad Request - Invalid parameters."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "startDate must be before or equal to endDate."
+  /api/v1/parcel:
+    post:
+      summary: "Create a new parcel"
+      description: "Creates a new parcel with the provided details."
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerName:
+                  type: string
+                paymentStatus:
+                  type: string
+                  enum:
+                    - "COD"
+                    - "Delivery Only"
+                    - "Fully Paid"
+                    - "Gate Drop Off"
+                seller:
+                  type: string
+                address:
+                  type: string
+                price:
+                  type: number
+                  format: float
+                deliveryFee:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: "Parcel created successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Successfully added new parcel"
+                  data:
+                    type: object
+                    properties:
+                      parcel:
+                        type: object
+                        properties:
+                          customerName:
+                            type: string
+                          address:
+                            type: string
+                          price:
+                            type: number
+                          seller:
+                            type: string
+                          paymentStatus:
+                            type: string
+                          deliveryStatus:
+                            type: string
+                          batchId:
+                            type: string
+                            nullable: true
+                          deliveryFee:
+                            type: number
+                          parcelCreatedAt:
+                            type: string
+                            format: date-time
+                          ParcelUpdatedAt:
+                            type: string
+                            format: date-time
+                          _id:
+                            type: string
+                          __v:
+                            type: integer
+        '400':
+          description: "Bad Request - Missing required fields or invalid data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Missing required fields: customerName, paymentStatus, seller, address."
+    delete:
+      summary: "Delete a specific parcel by ID"
+      description: "Deletes a parcel based on the provided ID(s)."
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of parcel IDs to be deleted."
+      responses:
+        '200':
+          description: "Successful response indicating the parcel was deleted."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "3 parcel(s) successfully deleted, and their IDs removed from associated delivery batches."
+        '400':
+          description: "Bad Request - Invalid input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "The 'ids' field must be an array."
+        '404':
+          description: "Not Found - Parcel not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "No parcels found with the following ID(s): {ids}"
+  /api/v1/parcel/range:
+    get:
+      summary: "Retrieve parcels within a date range"
+      description: "Fetches parcels that fall within the specified date range and optional delivery status."
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "The start date for the parcel retrieval in ISO 8601 format."
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: "The end date for the parcel retrieval in ISO 8601 format."
+        - in: query
+          name: deliveryStatus
+          required: false
+          schema:
+            type: string
+          description: "Filter parcels by their delivery status."
+      responses:
+        '200':
+          description: "Successful response with parcel data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Successfully retrieved parcels."
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        customerName:
+                          type: string
+                        address:
+                          type: string
+                        price:
+                          type: number
+                        seller:
+                          type: string
+                        paymentStatus:
+                          type: string
+                        deliveryStatus:
+                          type: string
+                        batchId:
+                          type: string
+                          nullable: true
+                        deliveryFee:
+                          type: number
+                        parcelCreatedAt:
+                          type: string
+                          format: date-time
+                        ParcelUpdatedAt:
+                          type: string
+                          format: date-time
+        '400':
+          description: "Bad Request - Invalid date range."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "startDate must be before or equal to endDate."
+  /api/v1/parcel/{id}:
+    get:
+      summary: "Retrieve a specific parcel by ID"
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the parcel to retrieve."
+      responses:
+        '200':
+          description: "Successful response with parcel data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Successfully retrieved parcel."
+                  data:
+                    type: object
+                    properties:
+                      parcel:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          customerName:
+                            type: string
+                          address:
+                            type: string
+                          price:
+                            type: number
+                          seller:
+                            type: string
+                          paymentStatus:
+                            type: string
+                          deliveryStatus:
+                            type: string
+                          batchId:
+                            type: string
+                            nullable: true
+                          deliveryFee:
+                            type: number
+                          parcelCreatedAt:
+                            type: string
+                            format: date-time
+                          ParcelUpdatedAt:
+                            type: string
+                            format: date-time
+        '401':
+          description: "Unauthorized - Invalid or expired JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "You are not logged in! Authentication required"
+    patch:
+      summary: "Update a specific parcel by ID"
+      description: "Updates the details of a parcel based on the provided ID."
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the parcel to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerName:
+                  type: string
+                paymentStatus:
+                  type: string
+                seller:
+                  type: string
+                address:
+                  type: string
+                price:
+                  type: number
+                  format: float
+                deliveryFee:
+                  type: number
+                  format: float
+      responses:
+        '200':
+          description: "Successful response with updated parcel data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Parcel details updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      parcel:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          customerName:
+                            type: string
+                          address:
+                            type: string
+                          price:
+                            type: number
+                          seller:
+                            type: string
+                          paymentStatus:
+                            type: string
+                          deliveryStatus:
+                            type: string
+                          batchId:
+                            type: string
+                            nullable: true
+                          deliveryFee:
+                            type: number
+                          parcelCreatedAt:
+                            type: string
+                            format: date-time
+                          ParcelUpdatedAt:
+                            type: string
+                            format: date-time
+        '400':
+          description: "Bad Request - Invalid input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Invalid input data."
+        '404':
+          description: "Not Found - Parcel not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Parcel not found with ID: {parcelId}"
+  /api/v1/parcel/status/{id}:
+    patch:
+      summary: "Update parcel delivery status"
+      description: "Updates the delivery status of a specific parcel."
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: "The ID of the parcel to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deliveryStatus:
+                  type: string
+                  description: "The new delivery status for the parcel."
+                  example: "On Deli"
+              required:
+                - deliveryStatus
+      responses:
+        '200':
+          description: "Successful response with updated parcel data."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Parcel delivery status updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      parcel:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          customerName:
+                            type: string
+                          address:
+                            type: string
+                          price:
+                            type: number
+                          seller:
+                            type: string
+                          paymentStatus:
+                            type: string
+                          deliveryStatus:
+                            type: string
+                          batchId:
+                            type: string
+                            nullable: true
+                          deliveryFee:
+                            type: number
+                          parcelCreatedAt:
+                            type: string
+                            format: date-time
+                          ParcelUpdatedAt:
+                            type: string
+                            format: date-time
+        '400':
+          description: "Bad Request - Invalid input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Invalid input data."
+        '404':
+          description: "Not Found - Parcel not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Parcel not found with ID: {parcelId}"
+  /api/v1/parcel/search:
+    get:
+      summary: "Search parcels by customer name"
+      description: "Search parcels by customer name"
+      tags:
+        - Parcel Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          description: "The customer name to search for."
+      responses:
+        '200':
+          description: "Successful response with search results."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Search results for '{query}'"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        customerName:
+                          type: string
+                        price:
+                          type: number
+                        parcelCreatedAt:
+                          type: string
+                          format: date-time
+        '400':
+          description: "Bad Request - Invalid input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Query parameter 'query' is required"
+        '401':
+          description: "Unauthorized - Missing or invalid JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Unauthorized - Missing or invalid JWT token."
+        '500':
+          description: "Internal Server Error - An unexpected error occurred."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "invalid signature"
+  /api/v1/parcel-batch:
+    post:
+      summary: "Create a new delivery batch from selected parcels"
+      description: "Create a new delivery batch from selected parcels"
+      tags:
+        - Parcel Batching
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parcelIds:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of parcel IDs to include in the batch"
+      responses:
+        '200':
+          description: "Successful response with created batch data."
+          content:
+            application/json:
+              schema:
+                          type: object
+                          properties:
+                            code:
+                              type: integer
+                              example: 200
+                            status:
+                              type: string
+                              example: "success"
+                            message:
+                              type: string
+                              example: "Delivery batch created successfully"
+                            data:
+                              type: object
+                              properties:
+                                _id:
+                                  type: string
+                                batchName:
+                                  type: string
+                                deliveryType:
+                                  type: string
+                                parcels:
+                                  type: array
+                                  items:
+                                    type: string
+                                status:
+                                  type: string
+                                batchCreatedAt:
+                                  type: string
+                                  format: date-time
+                                batchUpdatedAt:
+                                  type: string
+                                  format: date-time
+    get:
+      summary: "Get delivery batches by status"
+      description: "Retrieves delivery batches based on their status."
+      tags:
+        - Parcel Batching
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: "The delivery status to filter batches."
+      responses:
+        '200':
+          description: "Successful response with delivery batches."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "All delivery batches retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        batchName:
+                          type: string
+                        deliveryType:
+                          type: string
+                        parcels:
+                          type: array
+                          items:
+                            type: string
+                        status:
+                          type: string
+                        batchCreatedAt:
+                          type: string
+                          format: date-time
+                        parcelCount:
+                          type: integer
+        '401':
+          description: "Unauthorized - Missing or invalid JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "You are not logged in! Authentication required"
+  /api/v1/parcel-batch/{batchId}:
+    get:
+      summary: "Get a specific delivery batch by ID"
+      description: "Retrieves a specific delivery batch by its ID."
+      tags:
+        - Parcel Batching
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: batchId
+          required: true
+          schema:
+            type: string
+          description: "The ID of the delivery batch to retrieve."
+      responses:
+        '200':
+          description: "Successful response with delivery batch."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Delivery batch retrieved successfully"
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      batchName:
+                        type: string
+                      deliveryType:
+                        type: string
+                      parcels:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            customerName:
+                              type: string
+                            address:
+                              type: string
+                            price:
+                              type: number
+                            seller:
+                              type: string
+                            paymentStatus:
+                              type: string
+                            deliveryStatus:
+                              type: string
+                            batchId:
+                              type: string
+                            deliveryFee:
+                              type: number
+                            parcelCreatedAt:
+                              type: string
+                              format: date-time
+                            ParcelUpdatedAt:
+                              type: string
+                              format: date-time
+                      status:
+                        type: string
+                      batchCreatedAt:
+                        type: string
+                        format: date-time
+                      batchUpdatedAt:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+                      total_parcel:
+                        type: integer
+        '401':
+          description: "Unauthorized - Missing or invalid JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "You are not logged in! Authentication required"
+    'delete':
+      summary: "Delete a delivery batch by ID"
+      description: "Deletes a delivery batch by its ID."
+      tags:
+        - Parcel Batching
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: batchId
+          required: true
+          schema:
+            type: string
+          description: "The ID of the delivery batch to delete."
+      responses:
+        '200':
+          description: "Successful response with deleted batch."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Delivery batch deleted successfully, and associated parcels reverted to pending."
+        '401':
+          description: "Unauthorized - Missing or invalid JWT token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "You are not logged in! Authentication required"
+        '404':
+          description: "Delivery batch not found with ID."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  status:
+                    type: string
+                    example: "fail"
+                  message:
+                    type: string
+                    example: "Delivery batch not found with ID: {batchId}"

@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "server.js",
+    "docs/swagger.yaml",
+    "routes/"
+  ],
+  "ext": "js,json,yaml"
+}

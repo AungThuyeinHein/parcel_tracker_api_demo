@@ -1,0 +1,5 @@
+/ecosystem.config.cjs
+
+node_modules/
+
+/.env
