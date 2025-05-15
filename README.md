@@ -149,7 +149,7 @@ NPM version (11.1.0)
 1.  **Clone the repository:** Open your terminal or command prompt and run the following command to clone the project repository:
 
     ```bash
-    git clone [https://github.com/AungThuyeinHein/parcel_tracker_api_demo.git](https://github.com/AungThuyeinHein/parcel_tracker_api_demo.git)
+    git clone https://github.com/AungThuyeinHein/parcel_tracker_api_demo.git
     ```
 
 2.  **Navigate to the project directory:** Change into the cloned repository's directory:
@@ -196,4 +196,16 @@ Production mode:
 
 ```bash
 npm run prod
+```
+
+Admin username
+
+```bash
+aung
+```
+
+Admin password
+
+```bash
+aung
 ```
